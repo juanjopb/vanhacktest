@@ -3,6 +3,7 @@
 - ec2_vpc_subnet_facts:
     region: "{{aws_region}}"
   register: vpc
+  
 - name: creation of security group of the ec2 instance
   ec2_group:
     name: example

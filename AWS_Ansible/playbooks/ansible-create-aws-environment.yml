@@ -1,0 +1,162 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: yes
+  vars:
+  - aws_region: us-east-1
+  - my_useast1_key: jjpb_key
+  - instance_type: t2.micro
+  - base_image: ami-09f9d773751b9d606
+  - key_path: "{{ lookup('file', '/home/juanperez/Documents/keys/jjpb_key') }}"
+
+  tasks:
+  - name: create VPC for Ansible
+    ec2_vpc_net:
+      name: VPC
+      state: present
+      cidr_block: 172.32.0.0/16
+      region: "{{ aws_region }}"
+      tags:
+        Name: VPC_IGW
+        Owner: jjpb    
+    register: VPC
+      
+  - name: display VPC results
+    debug: var=VPC
+  
+  - name: create internet gateway for VPC
+    ec2_vpc_igw:
+      state: present
+      region: "{{ aws_region }}"
+      vpc_id: "{{ VPC.vpc.id }}"
+      tags:
+        Name: VPC_IGW
+        Owner: jjpb 
+    register: VPC_igw
+
+  - name: display VPC IGW details
+    debug: var=VPC_igw
+  
+  - name: obtain all AZ present in region {{ aws_region }}
+    aws_az_facts:
+      region: "{{ aws_region }}"
+    register: az_in_region
+  
+  - name: display all AZ present in region {{ aws_region }}
+    debug: var=az_in_region
+  
+  #create public subnet in first az and private subnet in second az
+  - name: display AZ that will be used for public and private Subnets
+    debug:
+      msg:
+        - "public subnet in AZ: {{ az_in_region.availability_zones[0].zone_name }}"
+        - "private subnet in AZ: {{ az_in_region.availability_zones[1].zone_name }}"
+  
+  - name: create public subnet in AZ {{ az_in_region.availability_zones[0].zone_name }}
+    ec2_vpc_subnet:
+      state: present
+      cidr: 172.32.1.0/24
+      az: "{{ az_in_region.availability_zones[0].zone_name }}"
+      vpc_id: "{{ VPC.vpc.id }}"
+      region: "{{ aws_region }}"
+      map_public: yes
+      tags:
+        Name: public subnet
+        Owner: jjpb
+    register: public_subnet
+
+  - name: show public subnet details
+    debug: var=public_subnet
+  
+  - name: create private subnet in AZ {{ az_in_region.availability_zones[1].zone_name }}
+    ec2_vpc_subnet:
+      state: present
+      cidr: 172.32.2.0/24
+      az: "{{ az_in_region.availability_zones[1].zone_name }}"
+      vpc_id: "{{ VPC.vpc.id }}"
+      region: "{{ aws_region }}"
+      resource_tags:
+        Name: private subnet
+        Owner: jjpb
+    register: private_subnet
+
+  - name: show private subnet details
+    debug:  var=private_subnet
+
+  - name: create new route table for public subnet
+    ec2_vpc_route_table:
+      state: present
+      region: "{{ aws_region }}"
+      vpc_id: "{{ VPC.vpc.id }}"
+      tags:
+        Name: rt_VPC_PublicSubnet
+        Owner: jjpb
+      subnets:
+        - "{{ public_subnet.subnet.id }}"
+      routes:
+        - dest: 0.0.0.0/0
+          gateway_id: "{{ VPC_igw.gateway_id }}"
+    register: rt_VPC_PublicSubnet
+    
+  - name: display public route table
+    debug: var=rt_VPC_PublicSubnet
+  
+  - name: Security Group of EC2 Instance
+    ec2_group:
+      state: present
+      name: sg_VPC_publicsubnet
+      description: security group to access the server.
+      vpc_id: "{{ VPC.vpc.id }}"
+      region: "{{ aws_region }}"
+      rules:
+        - proto: tcp
+          from_port: 22
+          to_port: 22
+          cidr_ip: 0.0.0.0/0
+          rule_desc: allow ssh to server
+      tags:
+        Owner: jjpb
+    register: sg_VPC_publicsubnet
+
+  - name: display details for security group
+    debug: var=sg_VPC_publicsubnet 
+
+  - name: Create key pair
+    ec2_key:
+      name: "{{ my_useast1_key }}"
+      #key_material: "{{ key_path }}"
+      region: "{{ aws_region }}"
+    register: ec2_keypair
+  
+  - name: display details of the Key
+    debug: var=ec2_keypair
+
+  - name: create instance using Ansible
+    ec2:
+      key_name: "{{ my_useast1_key }}"
+      group: sg_VPC_publicsubnet
+      vpc_subnet_id: "{{ public_subnet.subnet.id }}"
+      instance_type: "{{ instance_type }}"
+      ec2_region: "{{ aws_region }}"
+      image: "{{ base_image }}"
+      assign_public_ip: yes
+      wait: yes
+      instance_tags:
+        Name: Webserver-jjpb
+        Owner: jjpb
+    register: ec2_web
+  
+  - name: display details for EC2 Instance
+    debug: var=ec2_web 
+
+#- set_fact: id={{ec2_web.instances[0].id}}
+
+##  - name: adding the newly created instance to a temporary group in order to access it later from another play
+##    add_host: name={{ item.public_ip }} groups=just_created
+##    with_items: ec2_web.instances
+##
+##  - name: Wait for SSH to come up
+##    wait_for: host={{ item.public_dns_name }} port=22 delay=10 timeout=640 state=started
+##    with_items: ec2_web.instances
+  
+  
