@@ -8,7 +8,7 @@
   - instance_type: t2.micro
   - base_image: ami-09f9d773751b9d606
   - key_path: "{{ lookup('file', '/home/juanperez/Documents/keys/jjpb_key') }}"
-  - hoststring: "ansible_ssh_user=ubuntu ansible_ssh_private_key_file=../aws-private.pem"
+  - hoststring: "ansible_ssh_user=ubuntu ansible_ssh_private_key_file=./AWS_Ansible/aws-private.pem"
   - hostpath: "../inventory/hosts"
 
   tasks:
@@ -116,6 +116,11 @@
           to_port: 22
           cidr_ip: 0.0.0.0/0
           rule_desc: allow ssh to server
+        - proto: tcp
+          from_port: 80
+          to_port: 80
+          cidr_ip: 0.0.0.0/0
+          rule_desc: allow Webserver expose
       tags:
         Owner: jjpb
     register: sg_VPC_publicsubnet
