@@ -150,6 +150,10 @@
       vpc_subnet_id: "{{ public_subnet.subnet.id }}"
       instance_type: "{{ instance_type }}"
       ec2_region: "{{ aws_region }}"
+      exact_count: 1
+      count_tag: 
+        Name: Webserver-jjpb
+        Owner: jjpb
       image: "{{ base_image }}"
       assign_public_ip: yes
       wait: yes
@@ -170,9 +174,3 @@
     with_items: '{{ ec2_web.instances }}'
 
   - wait_for: path={{ hostpath }} search_regex={{hoststring}}
-
-##  - name: Wait for SSH to come up
-##    wait_for: host={{ item.public_dns_name }} port=22 delay=10 timeout=640 state=started
-##    with_items: ec2_web.instances
-  
-  
