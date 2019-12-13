@@ -3,7 +3,8 @@
 
 Deploying
 1 Need to have aws credentials 
-2 Run `ansible-playbook -i hosts AWS_Ansible/playbooks/ansible-create-aws-environment.yml`
+2 Run `ansible-playbook -i AWS_Ansible/inventory/hosts AWS_Ansible/playbooks/ansible-create-aws-environment.yml`
+3 Run `ansible-playbook -i AWS_Ansible/inventory/hosts AWS_Ansible/playbooks/launch-flask-python.yml`
 
 
 
