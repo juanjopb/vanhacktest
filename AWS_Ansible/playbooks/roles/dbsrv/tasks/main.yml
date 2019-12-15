@@ -1,0 +1,74 @@
+---
+- name: Update linux
+  become: True
+  become_method: sudo
+  remote_user: ubuntu
+  raw: apt update  && apt install -y python3 python3-pip
+
+- name: Install MySQL
+  apt:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - python3-pip
+    - python3-mysqldb
+    - python-mysqldb
+    - mysql-server
+    - mysql-client 
+
+- name: Make sure pymysql is present
+  become: true # needed if the other tasks are not played as root
+  pip:
+    name: PyMySQL
+    state: present
+
+- name: Start the MySQL service
+  service: 
+    name: mysql 
+    state: started
+    enabled: true
+
+- name: Set root user password
+  become: True
+  mysql_user:
+      host: "{{ item }}" 
+      name: root
+      password: "{{ root_db_password }}"
+      # Login without credentials
+      check_implicit_admin: yes
+      state: present
+  with_items:
+      - localhost
+      - "{{ ansible_hostname }}"
+      - 127.0.0.1
+      - ::1
+
+#- name: copy .my.cnf file with root password credentials
+#  template: 
+#    src: ./files/my.cnf
+#    dest: ~/.my.cnf
+#    owner: root
+#    group: root
+#    mode: 0600
+      
+- name: "Create a new database with name {{db_mysql}}"
+  mysql_db:
+    name: "{{db_mysql}}"
+    state: present
+
+- name: "Create an User to connect DB"
+  mysql_user:
+    name: useradm 
+    password: "{{ user_db_password }}"
+    host: "{{ remote_webserver }}"
+    priv: '*.*:ALL,GRANT'
+    state: present 
+
+- name: "Remove Test database if it exist."
+  mysql_db: 
+    name: test 
+    state: absent
+
+- name: Set TimeZone America/Bogota
+  shell: timedatectl set-timezone "America/Bogota"
+  become: yes

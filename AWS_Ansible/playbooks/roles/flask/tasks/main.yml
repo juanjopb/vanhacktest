@@ -1,0 +1,49 @@
+- name: Pull app source code from GIT
+  git:
+    repo: https://github.com/juanjopb/vanhacktest.git
+    dest: /opt
+
+- name: Update linux
+  become: True
+  become_method: sudo
+  remote_user: ubuntu
+  raw: apt update  && apt install -y python3 python3-pip
+
+- name: Install MySQL
+  apt:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - python3-pip
+    - python3-mysqldb
+    - python-mysqldb
+    - mysql-client 
+
+- name: Make sure pymysql is present
+  become: true # needed if the other tasks are not played as root
+  pip:
+    name: PyMySQL
+    state: present
+
+- name:  Create MySQL database
+  mysql_db:
+    login_host:      "{{ rds_endpoint }}"
+    login_user:      "{{ rds_username }}"
+    login_password:  "{{ rds_password }}"
+    name:            "{{ rds_db_name }}"
+    state:           present
+
+- name: Install Flask
+  become: True
+  become_method: sudo
+  remote_user: ubuntu
+  pip:
+    name: 
+      - flask
+    state: latest
+
+- name: Running python app
+  become: True
+  become_method: sudo
+  remote_user: ubuntu
+  shell: nohup python3 /opt/FlaskApp/app.py &
