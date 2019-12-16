@@ -18,7 +18,7 @@
     - python3-mysqldb
     - python-mysqldb
     - mysql-client 
-    - python3.6-dev 
+    - python3.7-dev 
     - libmysqlclient-dev
 
 - name: Make sure pymysql is present
