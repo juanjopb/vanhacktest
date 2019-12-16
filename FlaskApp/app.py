@@ -72,28 +72,19 @@ def handle_data():
         print("Color: %s"%(var_color))
         # Check if account exists using MySQL
         try:
-            conn = mysql.connection.get_connection()
-            cursor = conn.cursor(dictionary=True)
-            ###cursor = mysql.connection.cursor()
-            #cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-            cursor.execute("SELECT * FROM preferences WHERE name = %s", [var_name])
-            # Fetch one record and return result
-            account = cursor.fetchone()
-            # If account exists in accounts table in out database
-            print(var_name)
+            cur = mysql.connection.cursor()
+            #cur.execute('''SELECT * FROM testingjjpb.preferences''')
+            cur.execute("SELECT * FROM preferences WHERE name = %s", [var_name])
+            account = cur.fetchone()
+            print(account)
             if account:
                 msg = 'User Already Exists!!'
-                # Create session data, we can access this data in other routes
-                #session['loggedin'] = True
-                #session['id'] = account['id']
-                #session['username'] = account['username']
-                # Redirect to home page
                 return 'User Exist!'
             else:
-                # Account doesnt exist or username/password incorrect
                 msg = 'User Does not exists'
-        except mysql.connector.ProgrammingError as err:
-            print(err)
+                return 'User Does not Exist!'
+        except mysql.connection.ProgrammingError as err:
+            print("Error")
             abort(500)
     # Show the login form with message (if any)
 

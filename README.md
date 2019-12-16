@@ -17,3 +17,8 @@ pip install boto boto3 ansible
 
 TODO: 
 - Change the KeyPair
+
+
+
+
+INSERT INTO `testingjjpb`.`preferences` (`idpreferences`, `name`, `color`, `pet`) VALUES ('1', 'juan', 'red', 'dog');
