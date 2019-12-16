@@ -7,7 +7,7 @@ aws_region: us-east-1
 my_useast1_key: aws-private-jjpb
 base_image: ami-09f9d773751b9d606
 instance_type: t2.micro
-ec2_count_instances: 2
+ec2_count_instances: 1
 key_path: "{{ lookup('file', '/home/juanperez/Documents/keys/jjpb_key') }}"
 hoststring: "ansible_ssh_user=ubuntu ansible_ssh_private_key_file=./AWS_Ansible/aws-private.pem"
 hostpath: "../inventory/hosts"
