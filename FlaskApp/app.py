@@ -58,11 +58,6 @@ def handle_data():
     var_name = request.form['inputName']
     var_color = request.form['favoriteColor']
     var_pet = request.form['comboPet']
-    print(var_name)
-    print(var_color)
-    #var_name = request.form['inputName']
-    #var_color = request.form['favoriteColor']
-    #var_pet = request.form['comboPet']
     if request.method == 'POST' and 'inputName' in request.form:
         # Create variables for easy access
         var_name = request.form['inputName']
@@ -70,6 +65,7 @@ def handle_data():
         var_pet = request.form['comboPet']
         print("Name: %s"%(var_name))
         print("Color: %s"%(var_color))
+        print("Pet: %s"%(var_pet))
         # Check if account exists using MySQL
         try:
             cur = mysql.connection.cursor()
@@ -79,15 +75,19 @@ def handle_data():
             print(account)
             if account:
                 msg = 'User Already Exists!!'
-                return 'User Exist!'
+                return 'User Already Exist!'
             else:
+                t  = (var_name, var_color, var_pet)
+                cur.execute("INSERT INTO preferences VALUES(NULL,%s,%s,%s)", t)
+                mysql.connection.commit()
                 msg = 'User Does not exists'
                 return 'User Does not Exist!'
         except mysql.connection.ProgrammingError as err:
-            print("Error")
+            print("Error", err)
             abort(500)
     # Show the login form with message (if any)
-
+        cur.close()
+    
     return render_template('index.html', msg=msg)
 
 @app.route("/", methods=['GET','POST'])
@@ -109,19 +109,6 @@ def main():
 ##    return render_template('index.html')
 ##
 
-
-
-###@app.route("/Authenticate")
-###def Authenticate():
-###    username = request.args.get('UserName')
-###    password = request.args.get('Password')
-###    cursor = mysql.connect().cursor()
-###    cursor.execute("SELECT * from preferences where name='" + username + "'")
-###    data = cursor.fetchone()
-###    if data is None:
-###     return "Username or Password is wrong"
-###    else:
-###     return "Logged in successfully"
 
 
 if __name__ == "__main__":

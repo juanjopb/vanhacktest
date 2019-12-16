@@ -8,7 +8,7 @@ Deploying
 
 
 sudo apt-get install python3.6-dev libmysqlclient-dev
-sudo pip3 install flask_mysqldb
+sudo pip3 install flask_mysqldb flask_table
 pip install flask
 
 sudo apt install python

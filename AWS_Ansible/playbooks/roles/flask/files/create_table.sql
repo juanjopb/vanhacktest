@@ -1,6 +1,6 @@
 CREATE TABLE `testingjjpb`.`preferences` (
-  `idpreferences` INT NOT NULL,
-  `name` VARCHAR(45) NULL,
+  `idpreferences` INT NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(45) NOT NULL,
   `color` VARCHAR(45) NULL,
   `pet` VARCHAR(45) NULL,
   PRIMARY KEY (`idpreferences`),

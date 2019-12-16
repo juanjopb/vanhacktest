@@ -18,6 +18,8 @@
     - python3-mysqldb
     - python-mysqldb
     - mysql-client 
+    - python3.6-dev 
+    - libmysqlclient-dev
 
 - name: Make sure pymysql is present
   become: true # needed if the other tasks are not played as root
@@ -67,6 +69,8 @@
   pip:
     name: 
       - flask
+      - flask_mysql
+      - flask_table
     state: latest
 
 - name: Running python app
