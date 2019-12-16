@@ -33,6 +33,33 @@
     name:            "{{ rds_db_name }}"
     state:           present
 
+- name: Copy SQL file to EC2 Server
+  copy: 
+    src: "./files/create_table.sql"
+    dest: "/opt/create_table.sql" 
+    mode: 0600
+  #when: ec2_keypair.changed
+
+- name:  Create MySQL database table
+  mysql_db:
+    login_host:      "{{ rds_endpoint }}"
+    login_user:      "{{ rds_username }}"
+    login_password:  "{{ rds_password }}"
+    name:            "{{ rds_db_name }}"
+    state:           import
+    target: "/opt/create_table.sql"
+
+- name: Register Environment Variables
+  shell: "export VAR_MYSQL_HOST={{ rds_endpoint }}"
+  #environment:
+  #  VAR_MYSQL_HOST: "{{ rds_endpoint }}"
+  #  VAR_MYSQL_USER: "{{ rds_username }}"
+  #  VAR_MYSQL_PASSWORD: "{{ rds_password }}"
+  #  VAR_MYSQL_DB: "{{ rds_db_name }}"
+
+- name: Validating Environment Variables
+  shell: "echo $VAR_MYSQL_HOST"
+
 - name: Install Flask
   become: True
   become_method: sudo

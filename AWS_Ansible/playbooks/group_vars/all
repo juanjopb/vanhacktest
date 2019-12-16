@@ -13,8 +13,8 @@ hoststring: "ansible_ssh_user=ubuntu ansible_ssh_private_key_file=./AWS_Ansible/
 hostpath: "../inventory/hosts"
 varpath: "./group_vars/all"
 ###### AWS-RDS
-rds_instance_name: db-jjpb-test
+rds_instance_name: jjpb-test
 rds_username: mysql_admin
 rds_password: 1nsecure
 rds_db_name: testingjjpb
-rds_endpoint: db-jjpb-test.cushakf5p0bn.us-east-1.rds.amazonaws.com
+rds_endpoint: jjpb-test.cushakf5p0bn.us-east-1.rds.amazonaws.com

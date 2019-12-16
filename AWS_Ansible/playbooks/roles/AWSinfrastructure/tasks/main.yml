@@ -173,7 +173,7 @@
     path: "{{ hostpath }}" 
     search_regex: "{{hoststring}}"
 
-- name: create RDS instance
+- name: create RDS instance ... Could take almost 5 minutes
   rds:
     command: create
     region: "{{ aws_region }}"
@@ -183,6 +183,8 @@
     instance_type: db.t2.micro
     username: "{{ rds_username }}"
     password: "{{ rds_password }}"
+    wait: yes
+    wait_timeout: 600
     tags:
       Environment: db_jjpb
       Application: test
