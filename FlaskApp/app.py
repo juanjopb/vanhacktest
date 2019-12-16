@@ -1,7 +1,7 @@
 from flask import Flask
 from flask import Flask, render_template, request, redirect, url_for, session, abort 
 from flask_mysqldb import MySQL
-import MySQLdb.cursors
+#import MySQLdb.cursors
 import re
 
 app = Flask(__name__)
@@ -108,7 +108,6 @@ def main():
 ##        return 'success'
 ##    return render_template('index.html')
 ##
-
 
 
 if __name__ == "__main__":

@@ -18,8 +18,11 @@
     - python3-mysqldb
     - python-mysqldb
     - mysql-client 
-    - python3.7-dev 
     - libmysqlclient-dev
+    - build-essential 
+    - libssl-dev 
+    - libffi-dev 
+    - python3-dev
 
 - name: Make sure pymysql is present
   become: true # needed if the other tasks are not played as root
@@ -62,7 +65,7 @@
 - name: Validating Environment Variables
   shell: "echo $VAR_MYSQL_HOST"
 
-- name: Install Flask
+- name: Install Flask and dependencies
   become: True
   become_method: sudo
   remote_user: ubuntu
@@ -71,6 +74,7 @@
       - flask
       - flask_mysql
       - flask_table
+      - flask_mysqldb
     state: latest
 
 - name: Running python app
