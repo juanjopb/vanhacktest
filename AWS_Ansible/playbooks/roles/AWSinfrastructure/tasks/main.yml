@@ -131,7 +131,7 @@
   debug: 
     var: ec2_keypair
 
-- name: Save private key
+- name: Save private key locally
   copy: 
     content: "{{ ec2_keypair.key.private_key }}" 
     dest: "../aws-private.pem" 
@@ -153,11 +153,13 @@
     instance_tags:
       Name: Webserver-vanhack
       Owner: vanhack
+      webserver: web-server
   register: ec2_web
 
-- name: sleep for 120 seconds and continue with play
+- name: Sleep for 120 seconds, waiting by EC2 instance to be ready
   wait_for:
     timeout: 120
+  when: ec2_web.changed
   delegate_to: localhost
 
 - name: Display details for EC2 Instance
@@ -171,7 +173,7 @@
     insertafter: "[webserver]" 
     line: "{{ item.public_ip }} {{hoststring}}"
     state: present
-  with_items: '{{ ec2_web.instances }}'
+  with_items: '{{ ec2_web.tagged_instances }}'
 
 - wait_for:
     path: "{{ hostpath }}" 
@@ -183,7 +185,7 @@
     key: "{{ lookup('pipe', 'ssh-keyscan -t rsa ' + item.public_ip) }}"
   with_items: "{{ ec2_web.tagged_instances }}"
 
-- name: Store EC2 instance IPs to provision against
+- name: Store EC2 instance IPs to provision
   add_host:
     hostname: "{{ item.public_ip }}"
     groupname: ec2_instance_ips

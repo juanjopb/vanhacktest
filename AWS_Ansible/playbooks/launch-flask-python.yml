@@ -1,9 +1,0 @@
----
-- name: "Deploy Flask on Ec2 instance"
-  hosts: webserver
-  become: yes
-  become_method: sudo
-  remote_user: ubuntu
-  gather_facts: no
-  roles:
-   - flask

@@ -1,6 +1,0 @@
-- name: "Spin Up ELB and add Servers"
-  hosts: localhost
-  connection: local
-  gather_facts: yes
-  roles:
-    - AWSelb
