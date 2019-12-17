@@ -13,7 +13,7 @@ After the infrastructure is deployed, the Web application written in Python will
   
 There are two options to execute.
 -  [Pre-Loaded Environment](#Pre-Loaded-Environment)
--  [Load environment from scratch](#Load-environment-from-scratch)
+-  [Load environment from scratch](#Load-From-Scratch)
 
   
 
@@ -21,7 +21,7 @@ There are two options to execute.
 
 URL: http://vanhack-load-balancer-1758030516.us-east-1.elb.amazonaws.com
 
-Repository https://github.com/juanjopb/vanhacktest branch `preloaded`
+Repository https://github.com/juanjopb/vanhacktest branch `preloadenvironment`
 
   
 
@@ -37,11 +37,13 @@ If you want to get into the EC2 instances (us-east-1 - N. Virginia) using ssh:
 ## Load From Scratch: 
 
 >  **Note:** The code was tested deploying from Ubuntu 19.04 machine, but should works using different distributions or SO.
->  You could deploy this code using the AWS credentials sent or using different AWS account. but It necessary to have configured.
+>  You could deploy this code using the AWS credentials sent or using different AWS account. but It necessary to have configured some credentials.
 
 
 ### Requirements:
 There are some requirements in order to run the code 
+
+- AWS credentials sent by email, or any AWS Account
 - Python, Git, Ansible, Awscli installed.
 ```sh
 
@@ -49,15 +51,14 @@ $ sudo apt-get install python3.7 python-pip git awscli
 $ pip install boto boto3 ansible
 
 ```
-- AWS credentials were sent by email, you will need to configure.
 
   
 
 ### Before to deploy
 
 Some configurations could be customized, the settings are located on `AWS_Ansible/playbooks/group_vars/all`
-To change names, regions to deploy, or amount of instance, please take a look at the mentioned file.
->  **Note:** Using the Credentials sent and cloning the [repository](https://github.com/juanjopb/vanhacktest) in the **master** branch will deploy a New version in the Region (us-west-1 N.California) if you are going to deploy in another region, need to be changed the **(base_image) ami** and **aws_region**
+To change names, regions to deploy, or amount of instances, please take a look at the mentioned file.
+>  **Note:** Using the AWS Credentials sent and cloning the [repository](https://github.com/juanjopb/vanhacktest) with the **master** branch will deploy a New version in the Region (us-east-2 Ohio) if you are going to deploy in another region, need to be changed the **(base_image) ami** and **aws_region** looking for a corresponding **Image** on the **Region**
 >  If you want to deploy more than one instance, please modify '*ec2_count_instances=desired number*'
 
 
@@ -86,7 +87,8 @@ $ vanhacktest > ansible-playbook -i AWS_Ansible/playbooks/inventory/hosts AWS_An
 4. The deploy will start to show the progress 
 
 >  **Note:** The first time deploying the RDS instance could take almost 30 minutes to be ready. To avoid the time there is a RDS Instance preloaded.
->  **Note:** A private key will be saved on ***`AWS_Ansible/aws-private.pem`,*** please be careful and dont lose it..
+
+>  **Note:** A private key will be saved on ***`AWS_Ansible/aws-private.pem`,*** please be careful and don't lose it, you will need to enter on the EC2 Instances..
 
 5. Take note about the URL Endpoint Generated at the end of the Ansible Script.
  ![Should show somenthing similar](https://vanhack-test.s3.amazonaws.com/Images/Ansible-Results.png)
