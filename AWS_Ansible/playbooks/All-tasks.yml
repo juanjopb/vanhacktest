@@ -5,10 +5,11 @@
   gather_facts: yes
   roles:
    - AWSinfrastructure
+  vars:
+    rds_instances: '{{ rds_instance }}'
 
 - name: "Deploy Flask on Ec2 instance"
-  #hosts: ec2_instance_ips
-  hosts: webserver
+  hosts: ec2_instance_ips
   become: yes
   become_method: sudo
   remote_user: ubuntu

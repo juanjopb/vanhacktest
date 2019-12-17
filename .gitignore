@@ -1,1 +1,2 @@
 AWS_Ansible/aws-private.pem
+AWS_Ansible/playbooks/group_vars/endpointvariable.yaml
