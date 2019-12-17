@@ -1,0 +1,23 @@
+##### AWS
+ansible_python_interpreter: /usr/bin/python3
+aws_access_key: <enter AWS access key>
+aws_secret_key: <enter AWS secret key>
+key_name: <enter private key file alias name>
+aws_region: us-east-2
+base_image: ami-0d5d9d301c853a04a
+my_key: aws-private-vanhack
+instance_type: t2.micro
+ec2_count_instances: 2
+hoststring: "ansible_ssh_user=ubuntu ansible_ssh_private_key_file=./AWS_Ansible/aws-private.pem"
+hostsshuser: "ubuntu"
+hostsshkey: "./AWS_Ansible/aws-private.pem"
+hostpath: "./inventory/hosts"
+varpath: "./group_vars/all"
+###### AWS-RDS
+rds_instance_name: vanhack-instance
+rds_username: mysql_admin
+rds_password: 1nsecure
+rds_db_name: db_vanhack_test
+rds_endpoint:
+elb_name: vanhack-load-balancer
+elb_endpoint: 

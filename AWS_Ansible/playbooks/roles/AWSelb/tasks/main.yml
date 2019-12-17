@@ -1,0 +1,57 @@
+- name: Create the ELB only listening over port 80
+  ec2_elb_lb:
+    name: "{{ elb_name }}"
+    state: present
+    region: "{{ aws_region }}"
+    security_group_names: "{{ sg_VPC_publicsubnet.group_name }}"
+    subnets:
+      - "{{ public_subnet.subnet.id  }}"
+    listeners:
+      - protocol: http
+        load_balancer_port: 80
+        instance_port: 80
+    tags:
+      Owner: vanhack
+  register: elb
+
+- name: display details for ELB
+  debug: 
+    var: elb 
+
+- name: Add the ELB Endpoint to Var File
+  lineinfile: 
+    dest: "{{ varpath }}"
+    regexp: "^elb_endpoint:" 
+    line: "elb_endpoint: {{ item }}"
+    state: present
+  with_items: '{{ elb.elb.dns_name }}'
+  register: elb_endpoints
+
+- name: sleep for 60 seconds to servers to be healty
+  wait_for:
+    timeout: 60
+  when: elb_endpoints.changed
+  delegate_to: localhost
+
+- name: Add Instances to the ELB
+  ec2_elb:
+    state: present
+    ec2_elbs: "{{ elb_name  }}"
+    region: "{{ aws_region }}"
+    instance_id: "{{ item.id }}"
+    enable_availability_zone: no
+  with_items: "{{ ec2_web.tagged_instances }}"
+
+- name: General Information of AWS Infrastructure Deployed (ELB)
+  debug:
+    msg:
+      - "URL Endpoint: http://{{ elb.elb.dns_name }}"
+
+- name: General Information of AWS Infrastructure Deployed (Instances)
+  debug:
+    msg:
+      - "Instances IP Address: {{ item.public_ip }}"
+      - "URL Endpoint: http://{{ elb.elb.dns_name }}"
+  with_items: "{{ ec2_web.tagged_instances }}"
+
+

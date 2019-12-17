@@ -1,0 +1,28 @@
+---
+- name: "Deploy AWS insfrastructure"
+  hosts: localhost
+  connection: local
+  gather_facts: yes
+  roles:
+   - AWSinfrastructure
+  vars:
+    rds_instances: '{{ rds_instance }}'
+
+- name: "Deploy Flask on Ec2 instance"
+  hosts: ec2_instance_ips
+  become: yes
+  become_method: sudo
+  remote_user: ubuntu
+  gather_facts: no
+  roles:
+   - flask
+  vars:
+    rds_instances: '{{ rds_instance }}'
+
+- name: "Spin Up ELB and add Servers"
+  hosts: localhost
+  connection: local
+  gather_facts: yes
+  roles:
+    - AWSelb
+  

@@ -1,0 +1,249 @@
+- name: create VPC for Ansible
+  ec2_vpc_net:
+    name: VPC
+    state: present
+    cidr_block: 172.32.0.0/16
+    region: "{{ aws_region }}"
+    tags:
+      Name: VPC_IGW
+      Owner: vanhack    
+  register: VPC
+
+- name: display VPC results
+  debug: 
+    var: VPC
+
+- name: create internet gateway for VPC
+  ec2_vpc_igw:
+    state: present
+    region: "{{ aws_region }}"
+    vpc_id: "{{ VPC.vpc.id }}"
+    tags:
+      Name: VPC_IGW
+      Owner: vanhack 
+  register: VPC_igw
+
+- name: display VPC IGW details
+  debug: 
+    var: VPC_igw
+
+- name: obtain all AZ present in region {{ aws_region }}
+  aws_az_facts:
+    region: "{{ aws_region }}"
+  register: az_in_region
+
+- name: display all AZ present in region {{ aws_region }}
+  debug: 
+    var: az_in_region
+
+#create public subnet in first az and private subnet in second az
+- name: display AZ that will be used for public and private Subnets
+  debug:
+    msg:
+      - "public subnet in AZ: {{ az_in_region.availability_zones[0].zone_name }}"
+      - "private subnet in AZ: {{ az_in_region.availability_zones[1].zone_name }}"
+
+- name: create public subnet in AZ {{ az_in_region.availability_zones[0].zone_name }}
+  ec2_vpc_subnet:
+    state: present
+    cidr: 172.32.1.0/24
+    az: "{{ az_in_region.availability_zones[0].zone_name }}"
+    vpc_id: "{{ VPC.vpc.id }}"
+    region: "{{ aws_region }}"
+    map_public: yes
+    tags:
+      Name: public subnet
+      Owner: vanhack
+  register: public_subnet
+
+- name: show public subnet details
+  debug: 
+    var: public_subnet
+
+- name: create private subnet 1 in AZ {{ az_in_region.availability_zones[1].zone_name }}
+  ec2_vpc_subnet:
+    state: present
+    cidr: 172.32.2.0/24
+    az: "{{ az_in_region.availability_zones[1].zone_name }}"
+    vpc_id: "{{ VPC.vpc.id }}"
+    region: "{{ aws_region }}"
+    resource_tags:
+      Name: private subnet
+      Owner: vanhack
+  register: private_subnet1
+
+- name: show private subnet 1 details
+  debug:  
+    var: private_subnet1
+
+- name: create new route table for public subnet
+  ec2_vpc_route_table:
+    state: present
+    region: "{{ aws_region }}"
+    vpc_id: "{{ VPC.vpc.id }}"
+    tags:
+      Name: rt_VPC_PublicSubnet
+      Owner: vanhack
+    subnets:
+      - "{{ public_subnet.subnet.id }}"
+    routes:
+      - dest: 0.0.0.0/0
+        gateway_id: "{{ VPC_igw.gateway_id }}"
+  register: rt_VPC_PublicSubne
+    
+- name: display public route table
+  debug: 
+    var: rt_VPC_PublicSubnet
+
+- name: Security Group of EC2 Instance
+  ec2_group:
+    state: present
+    name: sg_VPC_publicsubnet
+    description: security group to access the server.
+    vpc_id: "{{ VPC.vpc.id }}"
+    region: "{{ aws_region }}"
+    rules:
+      - proto: tcp
+        from_port: 22
+        to_port: 22
+        cidr_ip: 0.0.0.0/0
+        rule_desc: allow ssh to server
+      - proto: tcp
+        from_port: 80
+        to_port: 80
+        cidr_ip: 0.0.0.0/0
+        rule_desc: allow Webserver expose
+      - proto: tcp
+        from_port: 3306
+        to_port: 3306
+        cidr_ip: 0.0.0.0/0
+        rule_desc: allow Mysql expose
+    tags:
+      Owner: vanhack
+  register: sg_VPC_publicsubnet
+
+- name: display details for security group
+  debug: 
+    var: sg_VPC_publicsubnet 
+
+- name: Create an EC2 key pair
+  ec2_key:
+    name: "{{ my_key }}"
+    region: "{{ aws_region }}"
+  register: ec2_keypair
+
+- name: Display details of the Key
+  debug: 
+    var: ec2_keypair
+
+- name: Save private key locally
+  copy: 
+    content: "{{ ec2_keypair.key.private_key }}" 
+    dest: "../aws-private.pem" 
+    mode: 0600
+  when: ec2_keypair.changed
+
+- name: Create EC2 instance
+  ec2:
+    key_name: "{{ my_key }}"
+    group: sg_VPC_publicsubnet
+    vpc_subnet_id: "{{ public_subnet.subnet.id }}"
+    instance_type: "{{ instance_type }}"
+    ec2_region: "{{ aws_region }}"
+    exact_count: "{{ ec2_count_instances }}"
+    count_tag: webserver
+    image: "{{ base_image }}"
+    assign_public_ip: yes
+    wait: yes
+    instance_tags:
+      Name: Webserver-vanhack
+      Owner: vanhack
+      webserver: web-server
+  register: ec2_web
+
+- name: Sleep for 120 seconds, waiting by EC2 instance to be ready
+  wait_for:
+    timeout: 120
+  when: ec2_web.changed
+  delegate_to: localhost
+
+- name: Display details for EC2 Instance
+  debug: 
+    var: ec2_web 
+
+- name: Add the newly created EC2 instance(s) to host group
+  lineinfile: 
+    dest: "{{ hostpath }}"
+    regexp: "{{ item.public_ip }}" 
+    insertafter: "[webserver]" 
+    line: "{{ item.public_ip }} {{hoststring}}"
+    state: present
+  with_items: '{{ ec2_web.tagged_instances }}'
+
+- wait_for:
+    path: "{{ hostpath }}" 
+    search_regex: "{{hoststring}}"
+
+- name: Add EC2 instances as known hosts
+  known_hosts:
+    name: "{{ item.public_ip }}"
+    key: "{{ lookup('pipe', 'ssh-keyscan -t rsa ' + item.public_ip) }}"
+  with_items: "{{ ec2_web.tagged_instances }}"
+
+- name: Store EC2 instance IPs to provision
+  add_host:
+    hostname: "{{ item.public_ip }}"
+    groupname: ec2_instance_ips
+    ansible_ssh_user: "{{ hostsshuser }}"
+    ansible_ssh_private_key_file: "{{ hostsshkey }}"
+  with_items: "{{ ec2_web.tagged_instances }}"
+
+- name: Create RDS instance ... Could take almost 10 minutes
+  rds:
+    command: create
+    region: "{{ aws_region }}"
+    instance_name: "{{ rds_instance_name }}"
+    db_engine: MySQL
+    size: 20 
+    instance_type: db.t2.micro
+    username: "{{ rds_username }}"
+    password: "{{ rds_password }}"
+    wait: yes
+    wait_timeout: 600
+    publicly_accessible: yes
+    tags:
+      Environment: db_vanhack
+      Application: test
+  register: db_rds
+
+- name: Display details for RDS Instance endpoint
+  debug: 
+    var: db_rds.instance.endpoint
+
+- name: Add the newly created RDS instance(s) to Var File
+  lineinfile: 
+    dest: "{{ varpath }}"
+    regexp: "^rds_endpoint:" 
+    line: "rds_endpoint: {{ item }}"
+    state: present
+  with_items: '{{ db_rds.instance.endpoint }}'
+
+- name: Store RDS instance IPs to provision against
+  add_host:
+    hostname: "{{ item }}"
+    groupname: rds_instance
+  with_items: "{{ db_rds.instance.endpoint }}"
+
+- name: Echo RDS_ENDPOINT
+  shell: "echo $RDS_ENDPOINT"
+  environment:
+    RDS_ENDPOINT: db_rds.instance.endpoint
+
+- name: Set hostname of command server as fact
+  set_fact: 
+    endpointrds: "{{ db_rds.instance.endpoint }}"
+
+- name: Copy File
+  copy:
+    dest: "./group_vars/endpointvariable.yaml"
+    content: "{{ db_rds.instance.endpoint }}" 

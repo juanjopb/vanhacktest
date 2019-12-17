@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Vanhack Test JJPB</title>
+ 
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">    
+    <link href="../static/register.css" rel="stylesheet">
+    
+  </head>
+ 
+  <body>
+ 
+    <div class="container">
+      <div class="header">
+        <nav>
+          <ul class="nav nav-pills pull-right">
+          </ul>
+        </nav>
+      </div>
+ 
+      <div class="jumbotron">
+        <h1>Register your preferences</h1>
+        <form class="form-register" method="POST" action="{{ url_for('handle_data') }}">
+        <label for="inputName" class="sr-only">Name</label>
+        <input type="name" name="inputName" id="inputName" class="form-control" placeholder="Name" required autofocus></li>
+        <label for="favoriteColor" class="sr-only">Favorite Color</label>
+        <input type="selectcolor" name="favoriteColor" id="favoriteColor" class="form-control" placeholder="Favorite Color" required autofocus>
+        <select type="pet" name="comboPet" class="browser-default custom-select">
+            <option selected>Select your favourite Pet</option>
+            <option value="cat">Cat</option>
+            <option value="dog">Dog</option>
+        </select>
+        <div class="msg">{{ msg }}</div>
+        <input type="submit" class="btn btn-lg btn-primary btn-block" >
+      </form>
+      </div>
+ 
+       
+ 
+      <footer class="footer">
+        <p>&copy; Vanhack-Test - juanjopb@hotmail.com 2019</p>
+      </footer>
+ 
+    </div>
+  </body>
+</html>

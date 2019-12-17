@@ -1,0 +1,92 @@
+- name: Variable of RDS Endpoint
+  debug: 
+    msg: "the value of endpoint is {{lookup('file', './group_vars/endpointvariable.yaml') }}"
+
+- name: Set RDS Endpoint
+  set_fact:
+    rds_endpoint_file: "{{lookup('file', './group_vars/endpointvariable.yaml') }}"
+
+- name: Pull app source code from GIT
+  git:
+    repo: https://github.com/juanjopb/vanhacktest.git
+    dest: /opt
+
+- name: Update linux
+  raw: apt update  && apt install -y python3 python3-pip
+
+- name: Add SSH for Vanhack
+  user: 
+    name: vanhackuser
+    generate_ssh_key: yes
+
+- name: Add public keys vanhack
+  authorized_key: 
+    user: vanhackuser
+    state: present
+    key: "{{ lookup('file', './files/id_vanhack.pub') }}"
+
+- name: Install MySQL
+  apt:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - python3-pip
+    - python3-mysqldb
+    - python-mysqldb
+    - mysql-client 
+    - libmysqlclient-dev
+    - build-essential 
+    - libssl-dev 
+    - libffi-dev 
+    - python3-dev
+
+- name: Make sure pymysql is present
+  pip:
+    name: PyMySQL
+    state: present
+
+- name:  Create MySQL database
+  mysql_db:
+    login_host:      "{{ rds_endpoint_file }}"
+    login_user:      "{{ rds_username }}"
+    login_password:  "{{ rds_password }}"
+    name:            "{{ rds_db_name }}"
+    state:           present
+
+- name: Copy SQL file to EC2 Server
+  copy: 
+    src: "./files/create_table.sql"
+    dest: "/opt/create_table.sql" 
+    mode: 0600
+
+- name:  Create MySQL database table
+  mysql_db:
+    login_host:      "{{ rds_endpoint_file }}"
+    login_user:      "{{ rds_username }}"
+    login_password:  "{{ rds_password }}"
+    name:            "{{ rds_db_name }}"
+    state:           import
+    target: "/opt/create_table.sql"
+
+- name: Create yaml with mysql Variables
+  copy:
+    mode: 0600
+    dest: "/opt/mysql_vars.yaml"
+    content: |
+      VAR_MYSQL_HOST: {{ rds_endpoint_file }}
+      VAR_MYSQL_USER: {{ rds_username }}
+      VAR_MYSQL_PASSWORD: {{ rds_password }}
+      VAR_MYSQL_DB: {{ rds_db_name }}
+
+- name: Install Flask and dependencies
+  pip:
+    name: 
+      - flask
+      - flask_mysql
+      - flask_table
+      - flask_mysqldb
+      - pyyaml
+    state: latest
+
+- name: Running python app
+  shell: nohup python3 /opt/FlaskApp/app.py &
