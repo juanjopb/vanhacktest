@@ -1,7 +1,3 @@
-- name: Display details for RDS Instance endpoint
-  debug: 
-    var: rds_instances
-
 - name: Pull app source code from GIT
   git:
     repo: https://github.com/juanjopb/vanhacktest.git
@@ -9,6 +5,17 @@
 
 - name: Update linux
   raw: apt update  && apt install -y python3 python3-pip
+
+- name: Add SSH for Vanhack
+  user: 
+    name: vanhackuser
+    generate_ssh_key: yes
+
+- name: Add public keys vanhack
+  authorized_key: 
+    user: vanhackuser
+    state: present
+    key: "{{ lookup('file', './files/id_vanhack.pub') }}"
 
 - name: Install MySQL
   apt:
@@ -30,14 +37,6 @@
     name: PyMySQL
     state: present
 
-##- name: Change DB Name on sql file
-##  lineinfile: 
-##    src: "./files/create_table.sql"
-##    regexp: "^`testingjjpb`" 
-##    line: "{{ item }}"
-##    state: present
-##  with_items: '{{ rds_db_name }}'
-
 - name:  Create MySQL database
   mysql_db:
     login_host:      "{{ rds_endpoint }}"
@@ -45,7 +44,6 @@
     login_password:  "{{ rds_password }}"
     name:            "{{ rds_db_name }}"
     state:           present
-
 
 - name: Copy SQL file to EC2 Server
   copy: 

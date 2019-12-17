@@ -1,14 +1,15 @@
 # Vanhack Test
 
 This is a Short example to attend the Vanhacktest requirements.
+Ansible playbooks that deploy all the Infrastructure needed in order to Run an EC2 Instance, RDS instance with a ELB classic, and the instances running a webserver in Python.
 
 There are two options to execute.
-
 - Pre-Loaded Environment. (us-east-1 - N. Virginia)
 - Load an environment from scratch.
 
 ### Pre-Loaded Environment:
 URL: http://vanhack-load-balancer-1758030516.us-east-1.elb.amazonaws.com
+Repository https://github.com/juanjopb/vanhacktest branch `preloaded`
 
 If you want to get int the EC2 instances:
 - Connect using ssh you will need the PEM file that was sent by email or the PEM file that vanhack informed by the email.
@@ -17,7 +18,7 @@ If you want to get int the EC2 instances:
 
 ### Load From Scratch
 Requirements:
-This Option was tested deploying from an Ubuntu 19.04. should works using different versions.
+This Option was tested deploying from Ubuntu 19.04. should works using different versions.
 
 - Python, Git, Ansible, Awscli installed
  ```sh
@@ -27,7 +28,7 @@ $ pip install boto boto3 ansible
 - AWS credentials were sent by email, you will need to configure.
 
 Before to deploy
-Some configurations could be changed, there are located on
+Some configurations could be changed, there are located on `AWS_Ansible/playbooks/group_vars/all`
 
 Deploying
 1. Configure the aws credentials, `cd ~/.aws
@@ -44,6 +45,11 @@ $ ansible-playbook -i AWS_Ansible/playbooks/inventory/hosts AWS_Ansible/playbook
 ```
 4. A private key will be saved on `AWS_Ansible/aws-private.pem`, please be careful and dont lose it.
 5. Take note about the URL Endpoint Generated at the end of the Ansible Script.
+
+
+
+juanjopb@hotmail.com
+
 
 
 
