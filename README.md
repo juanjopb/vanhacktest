@@ -94,8 +94,9 @@ $ vanhacktest > ansible-playbook -i AWS_Ansible/playbooks/inventory/hosts AWS_An
  ![Should show somenthing similar](https://vanhack-test.s3.amazonaws.com/Images/Ansible-Results.png)
  
   
-Name: Juan José Perez
-Email: juanjopb@hotmail.com
+**Name**: Juan José Perez
+
+**Email**: juanjopb@hotmail.com
 
   
   
