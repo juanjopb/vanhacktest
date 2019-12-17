@@ -4,9 +4,9 @@
     dest: /opt
 
 - name: Update linux
-  become: True
-  become_method: sudo
-  remote_user: ubuntu
+  #become: True
+  #become_method: sudo
+  #remote_user: ubuntu
   raw: apt update  && apt install -y python3 python3-pip
 
 - name: Install MySQL
@@ -25,7 +25,7 @@
     - python3-dev
 
 - name: Make sure pymysql is present
-  become: true # needed if the other tasks are not played as root
+  #become: true # needed if the other tasks are not played as root
   pip:
     name: PyMySQL
     state: present
@@ -63,34 +63,35 @@
   #  VAR_MYSQL_DB: "{{ rds_db_name }}"
 
 - name: Create .sh with environment Variables
+  #become_method: sudo
+  #remote_user: ubuntu
   copy:
-    dest: "/opt/var_mysql.sh"
+    mode: 0600
+    dest: "/opt/mysql_vars.yaml"
     content: |
-      export VAR_MYSQL_HOST="{{ rds_endpoint }}"
-      export VAR_MYSQL_USER="{{ rds_username }}"
-      export VAR_MYSQL_PASSWORD="{{ rds_password }}"
-      export VAR_MYSQL_DB="{{ rds_db_name }}"
+      VAR_MYSQL_HOST: {{ rds_endpoint }}
+      VAR_MYSQL_USER: {{ rds_username }}
+      VAR_MYSQL_PASSWORD: {{ rds_password }}
+      VAR_MYSQL_DB: {{ rds_db_name }}
 
 - name: Execute the script
   command: sh /opt/var_mysql.sh
 
-#- name: Validating Environment Variables
-#  shell: "echo $VAR_MYSQL_HOST"
-
 - name: Install Flask and dependencies
-  become: True
-  become_method: sudo
-  remote_user: ubuntu
+  #become: True
+  #become_method: sudo
+  #remote_user: ubuntu
   pip:
     name: 
       - flask
       - flask_mysql
       - flask_table
       - flask_mysqldb
+      - pyyaml
     state: latest
 
 - name: Running python app
-  become: True
-  become_method: sudo
-  remote_user: ubuntu
+  #become: True
+  #become_method: sudo
+  #remote_user: ubuntu
   shell: nohup python3 /opt/FlaskApp/app.py &

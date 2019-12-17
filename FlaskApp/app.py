@@ -2,15 +2,17 @@ from flask import Flask
 from flask import Flask, render_template, request, redirect, url_for, session, abort 
 from flask_mysqldb import MySQL
 import re
-import os
+import yaml
 
 app = Flask(__name__)
+with open(r'/opt/mysql_vars.yaml') as file:
+    mysqlconf = yaml.load(file, Loader=yaml.FullLoader)
+    app.config['MYSQL_HOST'] = mysqlconf["VAR_MYSQL_HOST"]
+    app.config['MYSQL_USER'] = mysqlconf["VAR_MYSQL_USER"]
+    app.config['MYSQL_PASSWORD'] = mysqlconf["VAR_MYSQL_PASSWORD"]
+    app.config['MYSQL_DB'] = mysqlconf["VAR_MYSQL_DB"]
+    app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 
-app.config['MYSQL_HOST'] = 'jjpb-test.cushakf5p0bn.us-east-1.rds.amazonaws.com'
-app.config['MYSQL_USER'] = 'mysql_admin'
-app.config['MYSQL_PASSWORD'] = '1nsecure'
-app.config['MYSQL_DB'] = 'testingjjpb'
-app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 
 # Intialize MySQL
 mysql = MySQL(app)
