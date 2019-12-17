@@ -38,7 +38,7 @@ If you want to get into the EC2 instances (us-east-1 - N. Virginia) using ssh:
 
 >  **Note:** The code was tested deploying from Ubuntu 19.04 machine, but should works using different distributions or SO.
 >  You could deploy this code using the AWS credentials sent or using different AWS account. but It necessary to have configured.
->  Using the Credentials sent and cloning the [repository](https://github.com/juanjopb/vanhacktest) in the **master** branch will deploy a New version in the Region (us-west-2 Oregon)
+
 
 ### Requirements:
 There are some requirements in order to run the code 
@@ -57,7 +57,9 @@ $ pip install boto boto3 ansible
 
 Some configurations could be customized, the settings are located on `AWS_Ansible/playbooks/group_vars/all`
 To change names, regions to deploy, or amount of instance, please take a look at the mentioned file.
->  **Note:** If you want to deploy more than one instance, please modify '*ec2_count_instances=desired number*'
+>  **Note:** Using the Credentials sent and cloning the [repository](https://github.com/juanjopb/vanhacktest) in the **master** branch will deploy a New version in the Region (us-west-1 N.California) If is going to be deployed in another region, need to be changed the **(base_image) ami** and **aws_region**
+>  If you want to deploy more than one instance, please modify '*ec2_count_instances=desired number*'
+
 
 ### Deploying
 
@@ -83,7 +85,7 @@ $ vanhacktest > ansible-playbook -i AWS_Ansible/playbooks/inventory/hosts AWS_An
 ```
 4. The deploy will start to show the progress 
 
->  **Note:** The first time it's a little delayed due to the RDS creation and preparation.
+>  **Note:** The first time deploying the RDS instance could take almost 30 minutes to be ready. To avoid the time there is a RDS Instance preloaded.
 >  **Note:** A private key will be saved on ***`AWS_Ansible/aws-private.pem`,*** please be careful and dont lose it..
 
 5. Take note about the URL Endpoint Generated at the end of the Ansible Script.

@@ -113,6 +113,11 @@
         to_port: 80
         cidr_ip: 0.0.0.0/0
         rule_desc: allow Webserver expose
+      - proto: tcp
+        from_port: 3306
+        to_port: 3306
+        cidr_ip: 0.0.0.0/0
+        rule_desc: allow Mysql expose
     tags:
       Owner: vanhack
   register: sg_VPC_publicsubnet
@@ -203,8 +208,10 @@
     instance_type: db.t2.micro
     username: "{{ rds_username }}"
     password: "{{ rds_password }}"
+    security_groups: sg_VPC_publicsubnet
     wait: yes
     wait_timeout: 600
+    publicly_accessible: yes
     tags:
       Environment: db_vanhack
       Application: test
