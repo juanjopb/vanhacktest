@@ -62,8 +62,20 @@
   #  VAR_MYSQL_PASSWORD: "{{ rds_password }}"
   #  VAR_MYSQL_DB: "{{ rds_db_name }}"
 
-- name: Validating Environment Variables
-  shell: "echo $VAR_MYSQL_HOST"
+- name: Create .sh with environment Variables
+  copy:
+    dest: "/opt/var_mysql.sh"
+    content: |
+      export VAR_MYSQL_HOST="{{ rds_endpoint }}"
+      export VAR_MYSQL_USER="{{ rds_username }}"
+      export VAR_MYSQL_PASSWORD="{{ rds_password }}"
+      export VAR_MYSQL_DB="{{ rds_db_name }}"
+
+- name: Execute the script
+  command: sh /opt/var_mysql.sh
+
+#- name: Validating Environment Variables
+#  shell: "echo $VAR_MYSQL_HOST"
 
 - name: Install Flask and dependencies
   become: True

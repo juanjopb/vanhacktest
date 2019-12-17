@@ -1,0 +1,22 @@
+---
+- name: "Deploy AWS insfrastructure"
+  hosts: localhost
+  connection: local
+  gather_facts: yes
+  roles:
+   - AWSinfrastructure
+
+- name: "Deploy Flask on Ec2 instance"
+  hosts: ec2_instance_ips
+  become: yes
+  gather_facts: no
+  roles:
+   - flask
+
+- name: "Spin Up ELB and add Servers"
+  hosts: localhost
+  connection: local
+  gather_facts: yes
+  roles:
+    - AWSelb
+  
