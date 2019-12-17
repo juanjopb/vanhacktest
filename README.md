@@ -37,6 +37,8 @@ If you want to get into the EC2 instances (us-east-1 - N. Virginia) using ssh:
 ## Load From Scratch: 
 
 >  **Note:** The code was tested deploying from Ubuntu 19.04 machine, but should works using different distributions or SO.
+>  You could deploy this code using the AWS credentials sent or using different AWS account. but It necessary to have configured.
+>  Using the Credentials sent and cloning the [repository](https://github.com/juanjopb/vanhacktest) in the **master** branch will deploy a New version in the Region (us-west-2 Oregon)
 
 ### Requirements:
 There are some requirements in order to run the code 
@@ -88,5 +90,10 @@ $ vanhacktest > ansible-playbook -i AWS_Ansible/playbooks/inventory/hosts AWS_An
  ![Should show somenthing similar](s3://juanjosepb/vanhacktest/ansible-final-information.png)
  
   
-
+Name: Juan José Perez
 Email: juanjopb@hotmail.com
+
+  
+  
+  
+  
