@@ -4,21 +4,21 @@ aws_access_key: <enter AWS access key>
 aws_secret_key: <enter AWS secret key>
 key_name: <enter private key file alias name>
 aws_region: us-east-1
-my_key: aws-private-jjpb
+my_key: aws-private-vanhack
 base_image: ami-09f9d773751b9d606
 instance_type: t2.micro
 ec2_count_instances: 1
-key_path: "{{ lookup('file', '/home/juanperez/Documents/keys/jjpb_key') }}"
+key_path: "{{ lookup('file', '/home/juanperez/Documents/keys/vanhack_key') }}"
 hoststring: "ansible_ssh_user=ubuntu ansible_ssh_private_key_file=./AWS_Ansible/aws-private.pem"
 hostsshuser: "ubuntu"
 hostsshkey: "./AWS_Ansible/aws-private.pem"
 hostpath: "./inventory/hosts"
 varpath: "./group_vars/all"
 ###### AWS-RDS
-rds_instance_name: jjpb-test
+rds_instance_name: vanhack-test
 rds_username: mysql_admin
 rds_password: 1nsecure
-rds_db_name: testingjjpb
-rds_endpoint: jjpb-test.cushakf5p0bn.us-east-1.rds.amazonaws.com
-elb_name: jjpb-load-balancer
-elb_endpoint: jjpb-load-balancer-16216951.us-east-1.elb.amazonaws.com
+rds_db_name: testingvanhack
+rds_endpoint:
+elb_name: vanhack-load-balancer
+elb_endpoint: 

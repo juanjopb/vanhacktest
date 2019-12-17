@@ -4,7 +4,7 @@ This is a Short example to attend the Vanhacktest requirements.
 
 There are two options to execute.
 
-- Pre-Loaded Environment.
+- Pre-Loaded Environment. (us-east-1 - N. Virginia)
 - Load an environment from scratch.
 
 ### Pre-Loaded Environment:
@@ -27,15 +27,14 @@ This Option was tested deploying from an Ubuntu 19.04. should works using differ
 Deploying
 1. Configure the aws credentials 
 2. Clone the repo 
-3. located on the top of the cloned repo run `ansible-playbook -i AWS_Ansible/inventory/hosts AWS_Ansible/playbooks/ansible-create-aws-environment.yml -e 'ansible_python_interpreter=/usr/bin/python3'`
-4. During the running, the system will ask you to add in finger
-4. Take note about the URL Generated at the end
-4. Run `ansible-playbook -i AWS_Ansible/inventory/hosts AWS_Ansible/playbooks/launch-flask-python.yml -e 'ansible_python_interpreter=/usr/bin/python3'`
+3. located on the top of the cloned repo run `ansible-playbook -i AWS_Ansible/playbooks/inventory/hosts AWS_Ansible/playbooks/All-tasks.yml -e 'ansible_python_interpreter=/usr/bin/python3'`
+4. A private key will be created as `AWS_Ansible/aws-private.pem`
+5. Take note about the URL Endpoint Generated at the end of the Ansible Script.
 
 
 
-sudo apt install python
-sudo apt install python-pip
+
+sudo apt install python3.7 python3-pip
 pip install boto boto3 ansible
 
 TODO: 

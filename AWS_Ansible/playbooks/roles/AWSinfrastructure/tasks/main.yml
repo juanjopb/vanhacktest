@@ -6,7 +6,7 @@
     region: "{{ aws_region }}"
     tags:
       Name: VPC_IGW
-      Owner: jjpb    
+      Owner: vanhack    
   register: VPC
 
 - name: display VPC results
@@ -20,7 +20,7 @@
     vpc_id: "{{ VPC.vpc.id }}"
     tags:
       Name: VPC_IGW
-      Owner: jjpb 
+      Owner: vanhack 
   register: VPC_igw
 
 - name: display VPC IGW details
@@ -53,7 +53,7 @@
     map_public: yes
     tags:
       Name: public subnet
-      Owner: jjpb
+      Owner: vanhack
   register: public_subnet
 
 - name: show public subnet details
@@ -69,7 +69,7 @@
     region: "{{ aws_region }}"
     resource_tags:
       Name: private subnet
-      Owner: jjpb
+      Owner: vanhack
   register: private_subnet1
 
 - name: show private subnet 1 details
@@ -83,7 +83,7 @@
     vpc_id: "{{ VPC.vpc.id }}"
     tags:
       Name: rt_VPC_PublicSubnet
-      Owner: jjpb
+      Owner: vanhack
     subnets:
       - "{{ public_subnet.subnet.id }}"
     routes:
@@ -114,7 +114,7 @@
         cidr_ip: 0.0.0.0/0
         rule_desc: allow Webserver expose
     tags:
-      Owner: jjpb
+      Owner: vanhack
   register: sg_VPC_publicsubnet
 
 - name: display details for security group
@@ -151,8 +151,8 @@
     assign_public_ip: yes
     wait: yes
     instance_tags:
-      Name: Webserver-jjpb
-      Owner: jjpb
+      Name: Webserver-vanhack
+      Owner: vanhack
   register: ec2_web
 
 - name: sleep for 180 seconds and continue with play
@@ -204,7 +204,7 @@
     wait: yes
     wait_timeout: 600
     tags:
-      Environment: db_jjpb
+      Environment: db_vanhack
       Application: test
   register: db_rds
 
@@ -219,3 +219,9 @@
     line: "rds_endpoint: {{ item }}"
     state: present
   with_items: '{{ db_rds.instance.endpoint }}'
+
+- name: Store RDS instance IPs to provision against
+  add_host:
+    hostname: "{{ item }}"
+    groupname: rds_instance
+  with_items: "{{ db_rds.instance.endpoint }}"

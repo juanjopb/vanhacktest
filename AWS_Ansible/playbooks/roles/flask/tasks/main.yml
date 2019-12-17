@@ -4,9 +4,6 @@
     dest: /opt
 
 - name: Update linux
-  #become: True
-  #become_method: sudo
-  #remote_user: ubuntu
   raw: apt update  && apt install -y python3 python3-pip
 
 - name: Install MySQL
@@ -25,62 +22,53 @@
     - python3-dev
 
 - name: Make sure pymysql is present
-  #become: true # needed if the other tasks are not played as root
   pip:
     name: PyMySQL
     state: present
 
 - name:  Create MySQL database
   mysql_db:
-    login_host:      "{{ rds_endpoint }}"
+    login_host:      "{{ db_rds.instance.endpoint }}"
     login_user:      "{{ rds_username }}"
     login_password:  "{{ rds_password }}"
     name:            "{{ rds_db_name }}"
     state:           present
+
+- name: Change DB Name on sql file
+  lineinfile: 
+    dest: "./files/create_table.sql"
+    regexp: "^`testingjjpb`" 
+    line: "{{ item }}"
+    state: present
+  with_items: '{{ rds_db_name }}'
 
 - name: Copy SQL file to EC2 Server
   copy: 
     src: "./files/create_table.sql"
     dest: "/opt/create_table.sql" 
     mode: 0600
-  #when: ec2_keypair.changed
 
 - name:  Create MySQL database table
   mysql_db:
-    login_host:      "{{ rds_endpoint }}"
+    login_host:      "{{ db_rds.instance.endpoint }}"
     login_user:      "{{ rds_username }}"
     login_password:  "{{ rds_password }}"
     name:            "{{ rds_db_name }}"
     state:           import
     target: "/opt/create_table.sql"
 
-- name: Register Environment Variables
-  shell: "export VAR_MYSQL_HOST={{ rds_endpoint }}"
-  #environment:
-  #  VAR_MYSQL_HOST: "{{ rds_endpoint }}"
-  #  VAR_MYSQL_USER: "{{ rds_username }}"
-  #  VAR_MYSQL_PASSWORD: "{{ rds_password }}"
-  #  VAR_MYSQL_DB: "{{ rds_db_name }}"
 
-- name: Create .sh with environment Variables
-  #become_method: sudo
-  #remote_user: ubuntu
+- name: Create yaml with mysql Variables
   copy:
     mode: 0600
     dest: "/opt/mysql_vars.yaml"
     content: |
-      VAR_MYSQL_HOST: {{ rds_endpoint }}
+      VAR_MYSQL_HOST: {{ db_rds.instance.endpoint }}
       VAR_MYSQL_USER: {{ rds_username }}
       VAR_MYSQL_PASSWORD: {{ rds_password }}
       VAR_MYSQL_DB: {{ rds_db_name }}
 
-- name: Execute the script
-  command: sh /opt/var_mysql.sh
-
 - name: Install Flask and dependencies
-  #become: True
-  #become_method: sudo
-  #remote_user: ubuntu
   pip:
     name: 
       - flask
@@ -91,7 +79,4 @@
     state: latest
 
 - name: Running python app
-  #become: True
-  #become_method: sudo
-  #remote_user: ubuntu
   shell: nohup python3 /opt/FlaskApp/app.py &

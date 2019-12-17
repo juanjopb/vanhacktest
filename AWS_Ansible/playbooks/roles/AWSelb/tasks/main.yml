@@ -11,7 +11,7 @@
         load_balancer_port: 80
         instance_port: 80
     tags:
-      Owner: jjpb
+      Owner: vanhack
   register: elb
 
 - name: display details for ELB
