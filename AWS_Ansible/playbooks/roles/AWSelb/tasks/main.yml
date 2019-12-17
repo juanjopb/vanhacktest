@@ -27,9 +27,9 @@
   with_items: '{{ elb.elb.dns_name }}'
   register: elb_endpoints
 
-- name: sleep for 120 seconds and continue with play
+- name: sleep for 60 seconds to servers to be healty
   wait_for:
-    timeout: 120
+    timeout: 60
   when: elb_endpoints.changed
   delegate_to: localhost
 

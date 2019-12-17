@@ -1,3 +1,7 @@
+- name: Display details for RDS Instance endpoint
+  debug: 
+    var: rds_instances
+
 - name: Pull app source code from GIT
   git:
     repo: https://github.com/juanjopb/vanhacktest.git
@@ -36,6 +40,9 @@
   pip:
     name: PyMySQL
     state: present
+
+- name: Refresh inventory to ensure new instances exist in inventory
+  meta: refresh_inventory
 
 - name:  Create MySQL database
   mysql_db:
