@@ -1,3 +1,7 @@
+- name: Display details for RDS Instance endpoint
+  debug: 
+    var: rds_instances
+
 - name: Pull app source code from GIT
   git:
     repo: https://github.com/juanjopb/vanhacktest.git
@@ -26,21 +30,22 @@
     name: PyMySQL
     state: present
 
+##- name: Change DB Name on sql file
+##  lineinfile: 
+##    src: "./files/create_table.sql"
+##    regexp: "^`testingjjpb`" 
+##    line: "{{ item }}"
+##    state: present
+##  with_items: '{{ rds_db_name }}'
+
 - name:  Create MySQL database
   mysql_db:
-    login_host:      "{{ db_rds.instance.endpoint }}"
+    login_host:      "{{ rds_endpoint }}"
     login_user:      "{{ rds_username }}"
     login_password:  "{{ rds_password }}"
     name:            "{{ rds_db_name }}"
     state:           present
 
-- name: Change DB Name on sql file
-  lineinfile: 
-    dest: "./files/create_table.sql"
-    regexp: "^`testingjjpb`" 
-    line: "{{ item }}"
-    state: present
-  with_items: '{{ rds_db_name }}'
 
 - name: Copy SQL file to EC2 Server
   copy: 
@@ -50,7 +55,7 @@
 
 - name:  Create MySQL database table
   mysql_db:
-    login_host:      "{{ db_rds.instance.endpoint }}"
+    login_host:      "{{ rds_endpoint }}"
     login_user:      "{{ rds_username }}"
     login_password:  "{{ rds_password }}"
     name:            "{{ rds_db_name }}"
@@ -63,7 +68,7 @@
     mode: 0600
     dest: "/opt/mysql_vars.yaml"
     content: |
-      VAR_MYSQL_HOST: {{ db_rds.instance.endpoint }}
+      VAR_MYSQL_HOST: {{ rds_endpoint }}
       VAR_MYSQL_USER: {{ rds_username }}
       VAR_MYSQL_PASSWORD: {{ rds_password }}
       VAR_MYSQL_DB: {{ rds_db_name }}

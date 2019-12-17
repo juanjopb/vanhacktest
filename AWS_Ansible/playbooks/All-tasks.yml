@@ -14,6 +14,8 @@
   gather_facts: no
   roles:
    - flask
+  vars:
+    rds_instances: '{{ db_rds.instance.endpoint }}'
 
 - name: "Spin Up ELB and add Servers"
   hosts: localhost
@@ -21,10 +23,4 @@
   gather_facts: yes
   roles:
     - AWSelb
-
-- name: General Information of AWS Infrastructure Deployed
-  debug:
-    msg:
-      - "Instances : {{ ec2_web.tagged_instances }}"
-      - "URL Endpoint: {{ elb.elb.dns_name }}"
   

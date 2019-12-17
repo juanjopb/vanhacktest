@@ -157,7 +157,7 @@
 
 - name: sleep for 180 seconds and continue with play
   wait_for:
-    timeout: 60
+    timeout: 30
   delegate_to: localhost
 
 - name: Display details for EC2 Instance
@@ -201,6 +201,7 @@
     instance_type: db.t2.micro
     username: "{{ rds_username }}"
     password: "{{ rds_password }}"
+    #subnet: "{{ public_subnet.subnet.id }}"
     wait: yes
     wait_timeout: 600
     tags:
@@ -225,3 +226,9 @@
     hostname: "{{ item }}"
     groupname: rds_instance
   with_items: "{{ db_rds.instance.endpoint }}"
+
+#- meta: refresh_inventory
+
+#- pause:
+#    minutes: 1
+
