@@ -94,7 +94,7 @@ $ vanhacktest > ansible-playbook -i AWS_Ansible/playbooks/inventory/hosts AWS_An
  ![Should show somenthing similar](https://vanhack-test.s3.amazonaws.com/Images/Ansible-Results.png)
  
 
- This is a ![video](https://vanhack-test.s3.amazonaws.com/Images/Ansible-Deploying.mp4) of an example of the deployment
+ This is a [video](https://vanhack-test.s3.amazonaws.com/Images/Ansible-Deploying.mp4) of an example of the deployment
   
 **Name**: Juan José Perez
 
